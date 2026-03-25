@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,12 +20,15 @@ import java.util.Map;
 public class ReservationController {
 
     private final RestTemplate restTemplate;
+    private final com.example.Artifact.service.ReservationService reservationService;
 
     @Value("${line.bot.token}")
     private String lineBotToken;
 
-    public ReservationController(RestTemplate restTemplate) {
+    public ReservationController(RestTemplate restTemplate,
+                                  com.example.Artifact.service.ReservationService reservationService) {
         this.restTemplate = restTemplate;
+        this.reservationService = reservationService;
     }
 
     @GetMapping
@@ -48,6 +52,8 @@ public class ReservationController {
             return ResponseEntity.status(500).body("line.bot.token is not configured");
         }
 
+        String reservationId = reservationService.createReservation(request);
+
         String displayMenu = (request.getMenu() != null && !request.getMenu().isBlank())
                 ? request.getMenu()
                 : "（未指定）";
@@ -59,20 +65,48 @@ public class ReservationController {
                 : "（未指定）";
         String couponLabel = request.getUseCoupon() ? "あり" : "なし";
 
-        String messageText = String.join("\n",
-                "【予約内容】",
-                "メニュー：" + displayMenu,
-                "日時：" + displayDateTime,
-                "担当者：" + displayStaff,
-                "クーポン利用：" + couponLabel);
+        // Flex Message（予約内容 + 末尾に「予約をキャンセル」ボタン）
+        Map<String, Object> bodyBox = new HashMap<>();
+        bodyBox.put("type", "box");
+        bodyBox.put("layout", "vertical");
+        bodyBox.put("contents", List.of(
+                Map.of("type", "text", "text", "【予約内容】", "weight", "bold", "size", "md"),
+                Map.of("type", "text", "text", "メニュー：" + displayMenu, "size", "sm"),
+                Map.of("type", "text", "text", "日時：" + displayDateTime, "size", "sm"),
+                Map.of("type", "text", "text", "担当者：" + displayStaff, "size", "sm"),
+                Map.of("type", "text", "text", "クーポン利用：" + couponLabel, "size", "sm")
+        ));
+
+        Map<String, Object> cancelPostback = Map.of(
+                "type", "postback",
+                "label", "予約をキャンセル",
+                "data", "action=cancel&id=" + reservationId
+        );
+
+        Map<String, Object> cancelButton = Map.of(
+                "type", "button",
+                "style", "primary",
+                "action", cancelPostback
+        );
+
+        Map<String, Object> footerBox = new HashMap<>();
+        footerBox.put("type", "box");
+        footerBox.put("layout", "vertical");
+        footerBox.put("contents", List.of(cancelButton));
+
+        Map<String, Object> bubble = new HashMap<>();
+        bubble.put("type", "bubble");
+        bubble.put("body", bodyBox);
+        bubble.put("footer", footerBox);
 
         // LINE Messaging API へのリクエストボディ作成
         Map<String, Object> body = new HashMap<>();
         body.put("to", request.getUserId());
         
-        Map<String, String> message = new HashMap<>();
-        message.put("type", "text");
-        message.put("text", messageText);
+        Map<String, Object> message = new HashMap<>();
+        message.put("type", "flex");
+        message.put("altText", "予約が完了しました");
+        message.put("contents", bubble);
         
         body.put("messages", Collections.singletonList(message));
 
