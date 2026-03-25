@@ -9,7 +9,7 @@ RUN mvn -B -DskipTests package && \
     # 実行用（先頭が Artifact- のもの）だけを app.jar にリネームする
     cp target/Artifact-*.jar target/app.jar
 
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 COPY --from=build /workspace/target/app.jar app.jar
