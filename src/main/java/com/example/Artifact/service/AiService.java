@@ -1,5 +1,6 @@
 package com.example.Artifact.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,15 @@ public class AiService {
   private String geminiApiKey;
 
   private final RestTemplate restTemplate = new RestTemplate();
+
+  @PostConstruct
+  public void init() {
+    String key = geminiApiKey;
+    if (key == null || key.isBlank()) {
+      key = System.getenv("GEMINI_API_KEY");
+    }
+    System.out.println("API Key Loaded: " + (key != null && !key.isBlank()));
+  }
 
   /**
    * 外部のAI API（Gemini）と通信して相談の回答を生成するメソッド
@@ -33,12 +43,13 @@ public class AiService {
       throw new Exception("GEMINI_API_KEY is not set");
     }
 
-    // 接続先URLの確認: エンドポイント (キーはヘッダーで送る)
-    String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    // URLパラメータの末尾に直接キーを付与する方式（ヘッダー渡しを廃止）
+    String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="
+        + apiKey;
 
     String systemPrompt = "あなたは表参道の人気美容室『Hair Salon Demo』のプロ美容師です。お客様の髪の悩みに寄り添い、具体的で分かりやすい専門的なアドバイスを、明るく丁寧な口調で提供してください。";
 
-    // JSONペイロードを手動で構築（内容はGeminiが期待する current form に準拠）
+    // JSONペイロードを手動で構築（Geminiが100%解釈できる最小限・最もシンプルな形）
     String jsonPayload = """
             {
               "systemInstruction": {
@@ -48,26 +59,22 @@ public class AiService {
               },
               "contents": [
                 {
-                  "role": "user",
                   "parts": [
                     { "text": "%s" }
                   ]
                 }
-              ],
-              "generationConfig": {
-                "temperature": 0.7
-              }
+              ]
             }
         """.formatted(escapeJson(systemPrompt), escapeJson(question));
 
-    // RestTemplateの設定: ヘッダーにAPIキーを設定
+    // 必要なのは application/json の宣言のみ
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("x-goog-api-key", apiKey);
 
     HttpEntity<String> requestEntity = new HttpEntity<>(jsonPayload, headers);
 
-    System.out.println("Gemini API Requst URI: " + url);
+    System.out.println(
+        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=HIDDEN");
 
     ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
 
