@@ -92,26 +92,26 @@ public class LineBotController {
             }
 
             CarouselColumn col1 = new CarouselColumn(
-                    URI.create("https://example.com/item1.jpg"),
+                    URI.create("https://images.unsplash.com/photo-1599305090598-fe179d501227?w=400&h=400&fit=crop"),
                     null,
-                    "商品おすすめ1 (" + cat + ")",
-                    "価格: ¥1,500",
+                    "プレミアムリペアシャンプー",
+                    "価格: ¥3,500",
                     null,
-                    List.of(new URIAction("購入する", URI.create("https://base.in/item1"), null)));
+                    List.of(new URIAction("購入する", URI.create("https://yoyaku-client.vercel.app"), null)));
             CarouselColumn col2 = new CarouselColumn(
-                    URI.create("https://example.com/item2.jpg"),
+                    URI.create("https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop"),
                     null,
-                    "商品おすすめ2 (" + cat + ")",
-                    "価格: ¥2,000",
+                    "高保湿ヘアオイル",
+                    "価格: ¥2,800",
                     null,
-                    List.of(new URIAction("購入する", URI.create("https://base.in/item2"), null)));
+                    List.of(new URIAction("購入する", URI.create("https://yoyaku-client.vercel.app"), null)));
             CarouselColumn col3 = new CarouselColumn(
-                    URI.create("https://example.com/item3.jpg"),
+                    URI.create("https://images.unsplash.com/photo-1629367494173-c78a56567877?w=400&h=400&fit=crop"),
                     null,
-                    "商品おすすめ3 (" + cat + ")",
-                    "価格: ¥2,500",
+                    "スカルプケアエッセンス",
+                    "価格: ¥4,200",
                     null,
-                    List.of(new URIAction("購入する", URI.create("https://base.in/item3"), null)));
+                    List.of(new URIAction("購入する", URI.create("https://yoyaku-client.vercel.app"), null)));
 
             return new TemplateMessage(
                     "おすすめ商品",
