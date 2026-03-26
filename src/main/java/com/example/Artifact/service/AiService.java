@@ -48,15 +48,11 @@ public class AiService {
         + apiKey;
 
     String systemPrompt = "あなたは表参道の人気美容室『Hair Salon Demo』のプロ美容師です。お客様の髪の悩みに寄り添い、具体的で分かりやすい専門的なアドバイスを、明るく丁寧な口調で提供してください。";
+    String combinedMessage = systemPrompt + "\\n以下の質問に丁寧にお答えください：\\n" + question;
 
-    // JSONペイロードを手動で構築（Geminiが100%解釈できる最小限・最もシンプルな形）
+    // JSONペイロードを手動で構築（Gemini v1が100%解釈できる最小限・最もシンプルな形）
     String jsonPayload = """
             {
-              "systemInstruction": {
-                "parts": [
-                  { "text": "%s" }
-                ]
-              },
               "contents": [
                 {
                   "parts": [
@@ -65,7 +61,7 @@ public class AiService {
                 }
               ]
             }
-        """.formatted(escapeJson(systemPrompt), escapeJson(question));
+        """.formatted(escapeJson(combinedMessage));
 
     // 必要なのは application/json の宣言のみ
     HttpHeaders headers = new HttpHeaders();
