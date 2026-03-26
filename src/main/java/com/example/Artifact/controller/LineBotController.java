@@ -123,6 +123,8 @@ public class LineBotController {
 
             } catch (Exception e) {
                 // 4. 通信エラーやAPI制限の例外処理
+                System.err.println("Gemini API処理中にエラーが発生しました: " + e.getMessage());
+                e.printStackTrace();
                 return new TextMessage("申し訳ありません、ただいまスタイリストが接客中で手が離せません。少し時間を置いてから再度話しかけてください🙏");
             }
         }
