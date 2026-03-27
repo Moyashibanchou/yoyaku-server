@@ -44,7 +44,9 @@ public class AiService {
     }
 
     // URLパラメータの末尾に直接キーを付与する方式（ヘッダー渡しを廃止）
-    String url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key="
+    String primaryUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key="
+        + apiKey;
+    String fallbackUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key="
         + apiKey;
 
     String systemPrompt = "あなたは表参道の人気美容室『Hair Salon Demo』のプロ美容師です。お客様の髪の悩みに寄り添い、具体的で分かりやすい専門的なアドバイスを、明るく丁寧な口調で提供してください。";
@@ -70,9 +72,19 @@ public class AiService {
     HttpEntity<String> requestEntity = new HttpEntity<>(jsonPayload, headers);
 
     System.out.println(
-        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=HIDDEN");
+        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=HIDDEN");
 
-    ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+    ResponseEntity<String> response;
+    try {
+      response = restTemplate.postForEntity(primaryUrl, requestEntity, String.class);
+    } catch (org.springframework.web.client.HttpClientErrorException e) {
+      if (e.getStatusCode().value() == 404) {
+        System.out.println("v1 APIで404 Not Foundが発生しました。予備のv1betaで再試行します...");
+        response = restTemplate.postForEntity(fallbackUrl, requestEntity, String.class);
+      } else {
+        throw e;
+      }
+    }
 
     if (!response.getStatusCode().is2xxSuccessful()) {
       throw new Exception("Gemini API error: Status=" + response.getStatusCode() + " Body=" + response.getBody());
