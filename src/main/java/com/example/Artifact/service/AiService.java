@@ -43,14 +43,11 @@ public class AiService {
       throw new Exception("GEMINI_API_KEY is not set");
     }
 
-    // URLパラメータの末尾に直接キーを付与する方式（エンコーディング回避のためURIクラスを使用）
-    String primaryUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key="
-        + apiKey;
-    String fallbackUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key="
+    // Gemini 1.5 Flash の最新・安定機能（無料枠）が完全に使えるのは v1beta です
+    String primaryUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="
         + apiKey;
 
     java.net.URI primaryUri = java.net.URI.create(primaryUrl);
-    java.net.URI fallbackUri = java.net.URI.create(fallbackUrl);
 
     String systemPrompt = "あなたは表参道の人気美容室『Hair Salon Demo』のプロ美容師です。お客様の髪の悩みに寄り添い、具体的で分かりやすい専門的なアドバイスを、明るく丁寧な口調で提供してください。";
     String combinedMessage = systemPrompt + "\\n以下の質問に丁寧にお答えください：\\n" + question;
@@ -75,19 +72,9 @@ public class AiService {
     HttpEntity<String> requestEntity = new HttpEntity<>(jsonPayload, headers);
 
     System.out.println(
-        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=HIDDEN");
+        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=HIDDEN");
 
-    ResponseEntity<String> response;
-    try {
-      response = restTemplate.postForEntity(primaryUri, requestEntity, String.class);
-    } catch (org.springframework.web.client.HttpClientErrorException e) {
-      if (e.getStatusCode().value() == 404) {
-        System.out.println("v1 1.5-flash モデルで404 Not Foundが発生しました。予備の gemini-2.0-flash で再試行します...");
-        response = restTemplate.postForEntity(fallbackUri, requestEntity, String.class);
-      } else {
-        throw e;
-      }
-    }
+    ResponseEntity<String> response = restTemplate.postForEntity(primaryUri, requestEntity, String.class);
 
     if (!response.getStatusCode().is2xxSuccessful()) {
       throw new Exception("Gemini API error: Status=" + response.getStatusCode() + " Body=" + response.getBody());
