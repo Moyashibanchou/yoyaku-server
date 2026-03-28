@@ -24,6 +24,17 @@ public class AiService {
       key = System.getenv("GEMINI_API_KEY");
     }
     System.out.println("API Key Loaded: " + (key != null && !key.isBlank()));
+
+    // 何のモデルが使えるかリストを取得してコンソールに出力するデバッグコード
+    try {
+      String modelsUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" + key;
+      ResponseEntity<String> response = restTemplate.getForEntity(java.net.URI.create(modelsUrl), String.class);
+      System.out.println("===== AVAILABLE MODELS (API KEY) =====");
+      System.out.println(response.getBody());
+      System.out.println("======================================");
+    } catch (Exception e) {
+      System.out.println("Failed to fetch available models: " + e.getMessage());
+    }
   }
 
   /**
@@ -43,8 +54,8 @@ public class AiService {
       throw new Exception("GEMINI_API_KEY is not set");
     }
 
-    // Gemini 1.5 Flash の最新・安定機能（無料枠）が完全に使えるのは v1beta です
-    String primaryUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key="
+    // 2026年時点のGoogle API仕様: アカウントで利用可能な無料枠対象の最新安定版は Gemini 2.5 Flash です
+    String primaryUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="
         + apiKey;
 
     java.net.URI primaryUri = java.net.URI.create(primaryUrl);
@@ -72,7 +83,7 @@ public class AiService {
     HttpEntity<String> requestEntity = new HttpEntity<>(jsonPayload, headers);
 
     System.out.println(
-        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=HIDDEN");
+        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=HIDDEN");
 
     ResponseEntity<String> response = restTemplate.postForEntity(primaryUri, requestEntity, String.class);
 
