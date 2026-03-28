@@ -44,7 +44,7 @@ public class AiService {
     }
 
     // Gemini 1.5 Flash の最新・安定機能（無料枠）が完全に使えるのは v1beta です
-    String primaryUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="
+    String primaryUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key="
         + apiKey;
 
     java.net.URI primaryUri = java.net.URI.create(primaryUrl);
@@ -72,7 +72,7 @@ public class AiService {
     HttpEntity<String> requestEntity = new HttpEntity<>(jsonPayload, headers);
 
     System.out.println(
-        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=HIDDEN");
+        "Gemini API Request URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=HIDDEN");
 
     ResponseEntity<String> response = restTemplate.postForEntity(primaryUri, requestEntity, String.class);
 
