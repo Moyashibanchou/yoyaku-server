@@ -37,6 +37,9 @@ public class LineBotController {
     private final FaqRepository faqRepository;
     private final ConcurrentHashMap<String, Boolean> aiModeUsers = new ConcurrentHashMap<>();
 
+    @org.springframework.beans.factory.annotation.Value("${ADMIN_LINE_ID:}")
+    private String adminLineId;
+
     @Autowired
     public LineBotController(ReservationService reservationService,
             UserInterestRepository userInterestRepository,
@@ -55,6 +58,32 @@ public class LineBotController {
         if (event.message() instanceof TextMessageContent textMessageContent) {
             String text = textMessageContent.text();
             String userId = event.source().userId();
+
+            // 1. 管理者の「対応終了」コマンドの処理
+            if (userId != null && userId.equals(adminLineId) && text.startsWith("対応終了")) {
+                String targetUserId = text.replace("対応終了", "").trim();
+                if (!targetUserId.isBlank()) {
+                    User user = userRepository.findById(targetUserId).orElse(null);
+                    if (user != null) {
+                        user.setManualMode(false);
+                        user.setWaitingForHuman(false);
+                        userRepository.save(user);
+                        return new TextMessage("ユーザー " + targetUserId + " の有人対応モードを終了しました。");
+                    }
+                    return new TextMessage("指定されたユーザーは見つかりませんでした。");
+                }
+            }
+
+            // 2. 有人モード（isManualMode）のチェック
+            if (userId != null) {
+                User user = userRepository.findById(userId).orElse(new User(userId));
+                if (user.isManualMode()) {
+                    // 有人モード中はAIを起動せず、管理者にメッセージを転送（モック）
+                    System.out.println("【管理者へのプッシュ通知転送】ユーザー " + userId + " からのメッセージ: " + text);
+                    // 実際は MessagingApiClient 等で adminLineId へ PushMessage を送信する
+                    return null; // AIからの自動応答はしない
+                }
+            }
 
             // 既存の固定トリガー
             if ("お悩み相談".equals(text)) {
@@ -91,11 +120,12 @@ public class LineBotController {
                 if (userId != null) {
                     User user = userRepository.findById(userId).orElse(new User(userId));
                     user.setWaitingForHuman(true);
+                    user.setManualMode(true);
                     userRepository.save(user);
                     // 管理者通知モック
-                    System.out.println("【通知】ユーザー " + userId + " が店員との会話を希望しています。");
+                    System.out.println("【管理者へのプッシュ通知】ユーザー " + userId + " が店員との会話を希望し、有人モードに移行しました。");
                 }
-                return new TextMessage("店員におつなぎします。少々お待ちください。");
+                return new TextMessage("店員におつなぎしました。今後の返信はスタッフが直接行いますので、ご用件をこのままお送りください。");
             }
 
             // AI相談モードまたは汎用FAQ応答
@@ -108,15 +138,16 @@ public class LineBotController {
 
                 // 2. Gemini連携による自然言語応答 (新しく作成した AiService を使用)
                 String aiResponse = aiService.askAi(text);
-                if (aiResponse == null || aiResponse.isBlank()) {
-                    // 3. 有人モードフラグ更新 (AI回答不能の場合)
+                if (aiResponse == null || aiResponse.isBlank() || aiResponse.contains("分かりかねます")) {
+                    // 3. 有人モードフラグ更新 (AI回答不能の場合、または特定のキーワードが含まれる場合)
                     if (userId != null) {
                         User user = userRepository.findById(userId).orElse(new User(userId));
                         user.setWaitingForHuman(true);
+                        user.setManualMode(true);
                         userRepository.save(user);
-                        System.out.println("【通知】ユーザー " + userId + " への自動回答ができなかったため、有人対応のリクエストが送信されました。");
+                        System.out.println("【管理者へのプッシュ通知】ユーザー " + userId + " への自動回答ができなかったため、有人モードに移行しました。");
                     }
-                    return new TextMessage("うまく理解できませんでした…店員におつなぎしますので、そのまま少々お待ちください。");
+                    return new TextMessage("申し訳ございません、私（AI）ではうまくお答えできませんでした。店員におつなぎしましたので、このままスタッフの応答をお待ちください。");
                 }
 
                 return new TextMessage(aiResponse);

@@ -10,6 +10,7 @@ public class User {
     @Id
     private String id;
     private boolean isWaitingForHuman;
+    private boolean isManualMode = false;
 
     public User() {
     }
@@ -32,5 +33,13 @@ public class User {
 
     public void setWaitingForHuman(boolean waitingForHuman) {
         isWaitingForHuman = waitingForHuman;
+    }
+
+    public boolean isManualMode() {
+        return isManualMode;
+    }
+
+    public void setManualMode(boolean manualMode) {
+        this.isManualMode = manualMode;
     }
 }
