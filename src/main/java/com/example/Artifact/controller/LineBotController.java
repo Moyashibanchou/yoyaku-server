@@ -59,6 +59,11 @@ public class LineBotController {
             String text = textMessageContent.text();
             String userId = event.source().userId();
 
+            // 「マイID」コマンド（ユーザーID確認用）
+            if ("マイID".equals(text) && userId != null) {
+                return new TextMessage(userId);
+            }
+
             // 1. 管理者の「対応終了」コマンドの処理
             if (userId != null && userId.equals(adminLineId) && text.startsWith("対応終了")) {
                 String targetUserId = text.replace("対応終了", "").trim();
