@@ -1,14 +1,29 @@
 package com.example.Artifact.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+import java.time.Instant;
+
+@Entity
+@Table(name = "reservations")
 public class Reservation {
     private String id;
     private String userId;
-    private String name;
-    private String menu;
-    private String dateTime;
-    private String staff;
-    private boolean useCoupon;
 
+    private String userName;
+    private String userPhone;
+    private String reservationDate;
+    private String reservationTime;
+    private String assistantName;
+    private String menuName;
+    private String couponName;
+
+    private String status;
+    private Instant createdAt;
+
+    @Id
     public String getId() {
         return id;
     }
@@ -25,44 +40,76 @@ public class Reservation {
         this.userId = userId;
     }
 
-    public String getName() {
-        return name;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getMenu() {
-        return menu;
+    public String getUserPhone() {
+        return userPhone;
     }
 
-    public void setMenu(String menu) {
-        this.menu = menu;
+    public void setUserPhone(String userPhone) {
+        this.userPhone = userPhone;
     }
 
-    public String getDateTime() {
-        return dateTime;
+    public String getReservationDate() {
+        return reservationDate;
     }
 
-    public void setDateTime(String dateTime) {
-        this.dateTime = dateTime;
+    public void setReservationDate(String reservationDate) {
+        this.reservationDate = reservationDate;
     }
 
-    public String getStaff() {
-        return staff;
+    public String getReservationTime() {
+        return reservationTime;
     }
 
-    public void setStaff(String staff) {
-        this.staff = staff;
+    public void setReservationTime(String reservationTime) {
+        this.reservationTime = reservationTime;
     }
 
-    public boolean isUseCoupon() {
-        return useCoupon;
+    public String getAssistantName() {
+        return assistantName;
     }
 
-    public void setUseCoupon(boolean useCoupon) {
-        this.useCoupon = useCoupon;
+    public void setAssistantName(String assistantName) {
+        this.assistantName = assistantName;
+    }
+
+    public String getMenuName() {
+        return menuName;
+    }
+
+    public void setMenuName(String menuName) {
+        this.menuName = menuName;
+    }
+
+    public String getCouponName() {
+        return couponName;
+    }
+
+    public void setCouponName(String couponName) {
+        this.couponName = couponName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 }
 

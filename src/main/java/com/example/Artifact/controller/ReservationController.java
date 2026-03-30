@@ -1,6 +1,7 @@
 package com.example.Artifact.controller;
 
 import com.example.Artifact.dto.ReservationRequest;
+import com.example.Artifact.service.ReservationService;
 import com.linecorp.bot.messaging.client.MessagingApiClient;
 import com.linecorp.bot.messaging.model.*;
 import org.slf4j.Logger;
@@ -19,10 +20,12 @@ public class ReservationController {
 
     private static final Logger log = LoggerFactory.getLogger(ReservationController.class);
     private final MessagingApiClient messagingClient;
+    private final ReservationService reservationService;
 
     @Autowired
-    public ReservationController(MessagingApiClient messagingClient) {
+    public ReservationController(MessagingApiClient messagingClient, ReservationService reservationService) {
         this.messagingClient = messagingClient;
+        this.reservationService = reservationService;
     }
 
     @PostMapping
@@ -34,6 +37,9 @@ public class ReservationController {
             log.error("エラー: お客様のLINE UserIDが届いていません。");
             return "Error: userId is missing";
         }
+
+        String reservationId = reservationService.createReservation(request);
+        log.info("予約をDB保存しました: reservationId={}, userId={}", reservationId, request.getUserId());
 
         // 2. Flex Message（豪華な予約票）の組み立て
         FlexText title = new FlexText(
@@ -75,9 +81,12 @@ public class ReservationController {
                 null,
                 null);
 
-        URIAction cancelAction = new URIAction(
+        PostbackAction cancelAction = new PostbackAction(
                 "予約をキャンセル",
-                URI.create("https://line.me/R/oaMessage/@YOUR_BOT_ID/"),
+                "action=cancel&id=" + reservationId,
+                "予約をキャンセル",
+                null,
+                null,
                 null);
 
         FlexButton cancelButton = new FlexButton(
@@ -122,7 +131,7 @@ public class ReservationController {
                     null);
 
             messagingClient.pushMessage(UUID.randomUUID(), pushMessageRequest).get();
-            log.info("お客様（{}）へ予約票を送信しました。", request.getUserId());
+            log.info("お客様（{}）へ予約票を送信しました。 reservationId={}", request.getUserId(), reservationId);
 
         } catch (Exception e) {
             log.error("LINE: " + e.getMessage(), e);

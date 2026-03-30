@@ -8,6 +8,7 @@ import com.example.Artifact.repository.UserRepository;
 import com.example.Artifact.repository.FaqRepository;
 import com.example.Artifact.service.AiService;
 import com.example.Artifact.service.ReservationService;
+import com.example.Artifact.model.Reservation;
 import com.linecorp.bot.messaging.model.ButtonsTemplate;
 import com.linecorp.bot.messaging.model.CarouselColumn;
 import com.linecorp.bot.messaging.model.CarouselTemplate;
@@ -28,9 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import com.example.Artifact.dto.ReservationRequest;
 
 import java.net.URI;
 import java.util.List;
@@ -254,8 +252,7 @@ public class LineBotController {
                     "価格: ¥3,500",
                     null,
                     List.of(
-                            new URIAction("予約", URI.create("https://liff.line.me/2009587376-RxyE3qYl"), null),
-                            new URIAction("ショップ", URI.create("https://liff.line.me/2009587376-SnE3T7WY"), null)));
+                            new URIAction("ショップ", URI.create("https://yoyaku-client.vercel.app/shop"), null)));
             CarouselColumn col2 = new CarouselColumn(
                     URI.create("https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop"),
                     null,
@@ -263,8 +260,7 @@ public class LineBotController {
                     "価格: ¥2,800",
                     null,
                     List.of(
-                            new URIAction("予約", URI.create("https://liff.line.me/2009587376-RxyE3qYl"), null),
-                            new URIAction("ショップ", URI.create("https://liff.line.me/2009587376-SnE3T7WY"), null)));
+                            new URIAction("ショップ", URI.create("https://yoyaku-client.vercel.app/shop"), null)));
             CarouselColumn col3 = new CarouselColumn(
                     URI.create("https://images.unsplash.com/photo-1629367494173-c78a56567877?w=400&h=400&fit=crop"),
                     null,
@@ -272,8 +268,7 @@ public class LineBotController {
                     "価格: ¥4,200",
                     null,
                     List.of(
-                            new URIAction("予約", URI.create("https://liff.line.me/2009587376-RxyE3qYl"), null),
-                            new URIAction("ショップ", URI.create("https://liff.line.me/2009587376-SnE3T7WY"), null)));
+                            new URIAction("ショップ", URI.create("https://yoyaku-client.vercel.app/shop"), null)));
 
             return new TemplateMessage(
                     "おすすめ商品",
@@ -287,11 +282,25 @@ public class LineBotController {
             return new TextMessage("予約のキャンセルに失敗しました");
         }
 
+        String userId = event.source().userId();
+        Reservation reservation = reservationService.getById(id);
+        if (reservation == null) {
+            log.info("キャンセル対象の予約が見つかりません: reservationId={}, userId={}", id, userId);
+            return new TextMessage("予約が見つかりませんでした");
+        }
+
+        if (userId == null || reservation.getUserId() == null || !reservation.getUserId().equals(userId)) {
+            log.warn("キャンセル拒否: userId不一致 reservationId={}, reservation.userId={}, request.userId={}", id, reservation.getUserId(), userId);
+            return new TextMessage("該当するユーザーがいません");
+        }
+
         boolean deleted = reservationService.deleteById(id);
         if (deleted) {
+            log.info("予約キャンセル完了: reservationId={}, userId={}", id, userId);
             return new TextMessage("予約のキャンセルが完了しました");
         }
 
-        return new TextMessage("予約が見つかりませんでした");
+        log.info("予約キャンセル失敗(削除不可): reservationId={}, userId={}", id, userId);
+        return new TextMessage("予約のキャンセルに失敗しました");
     }
 }

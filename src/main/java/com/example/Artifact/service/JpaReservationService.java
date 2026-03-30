@@ -2,16 +2,20 @@ package com.example.Artifact.service;
 
 import com.example.Artifact.dto.ReservationRequest;
 import com.example.Artifact.model.Reservation;
-import org.springframework.context.annotation.Profile;
+import com.example.Artifact.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-@Profile("inmemory")
-public class InMemoryReservationService implements ReservationService {
-    private final ConcurrentHashMap<String, Reservation> store = new ConcurrentHashMap<>();
+public class JpaReservationService implements ReservationService {
+    private final ReservationRepository reservationRepository;
+
+    public JpaReservationService(ReservationRepository reservationRepository) {
+        this.reservationRepository = reservationRepository;
+    }
 
     @Override
     public String createReservation(ReservationRequest request) {
@@ -28,18 +32,24 @@ public class InMemoryReservationService implements ReservationService {
         reservation.setMenuName(request.getMenuName());
         reservation.setCouponName(request.getCouponName());
         reservation.setStatus("ACTIVE");
+        reservation.setCreatedAt(Instant.now());
 
-        store.put(id, reservation);
+        reservationRepository.save(reservation);
         return id;
     }
 
     @Override
     public Reservation getById(String id) {
-        return store.get(id);
+        Optional<Reservation> reservation = reservationRepository.findById(id);
+        return reservation.orElse(null);
     }
 
     @Override
     public boolean deleteById(String id) {
-        return store.remove(id) != null;
+        if (!reservationRepository.existsById(id)) {
+            return false;
+        }
+        reservationRepository.deleteById(id);
+        return true;
     }
 }
