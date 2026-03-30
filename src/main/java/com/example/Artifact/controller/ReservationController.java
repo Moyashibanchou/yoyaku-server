@@ -1,131 +1,80 @@
 package com.example.Artifact.controller;
 
 import com.example.Artifact.dto.ReservationRequest;
+import com.linecorp.bot.messaging.client.MessagingApiClient;
+import com.linecorp.bot.messaging.model.PushMessageRequest;
+import com.linecorp.bot.messaging.model.TextMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5174")
 @RequestMapping("/api/reservations")
-@CrossOrigin(origins = "*")
 public class ReservationController {
 
-    private final RestTemplate restTemplate;
-    private final com.example.Artifact.service.ReservationService reservationService;
+    private static final Logger log = LoggerFactory.getLogger(ReservationController.class);
 
-    @Value("${line.bot.token}")
-    private String lineBotToken;
+    private final MessagingApiClient messagingClient;
 
-    public ReservationController(RestTemplate restTemplate,
-                                  com.example.Artifact.service.ReservationService reservationService) {
-        this.restTemplate = restTemplate;
-        this.reservationService = reservationService;
-    }
+    @Value("${ADMIN_LINE_ID:}")
+    private String adminLineId;
 
-    @GetMapping
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("API is running!");
+    // メモリ内の保存用リスト（一旦）
+    private final List<ReservationRequest> reservations = new ArrayList<>();
+
+    @Autowired
+    public ReservationController(MessagingApiClient messagingClient) {
+        this.messagingClient = messagingClient;
     }
 
     @PostMapping
-    public ResponseEntity<String> createReservation(@RequestBody ReservationRequest request) {
-        System.out.println("Received reservation request: userId=" + request.getUserId()
-                + ", menu=" + request.getMenu()
-                + ", dateTime=" + request.getDateTime()
-                + ", staff=" + request.getStaff()
-                + ", useCoupon=" + request.getUseCoupon());
+    public String createReservation(@RequestBody ReservationRequest request) {
+        // 受け取った内容をコンソールに出力
+        System.out.println("受け取った予約データ: " + request);
 
-        if (request.getUserId() == null || request.getUserId().isBlank()) {
-            return ResponseEntity.badRequest().body("userId is required");
+        // 一旦メモリ内に保存
+        reservations.add(request);
+
+        // 管理者へのLINE通知
+        if (adminLineId != null && !adminLineId.isEmpty()) {
+            String messageText = String.format(
+                    "【新規予約】\n" +
+                            "お客様：%s 様\n" +
+                            "電話：%s\n" +
+                            "日時：%s %s\n" +
+                            "担当：%s\n" +
+                            "メニュー：%s\n" +
+                            "クーポン：%s",
+                    request.getUserName(),
+                    request.getUserPhone(),
+                    request.getReservationDate(),
+                    request.getReservationTime(),
+                    request.getAssistantName(),
+                    request.getMenuName(),
+                    request.getCouponName());
+
+            try {
+                PushMessageRequest pushMessage = new PushMessageRequest(
+                        adminLineId,
+                        List.of(new TextMessage(messageText)),
+                        false,
+                        null);
+                messagingClient.pushMessage(UUID.randomUUID(), pushMessage).get();
+                log.info("予約通知を管理者に送信しました。");
+            } catch (Exception e) {
+                log.error("予約通知の送信に失敗しました: " + e.getMessage(), e);
+            }
+        } else {
+            log.warn("ADMIN_LINE_IDが設定されていないため、通知を送信しませんでした。");
         }
 
-        if (lineBotToken == null || lineBotToken.isBlank()) {
-            return ResponseEntity.status(500).body("line.bot.token is not configured");
-        }
-
-        String reservationId = reservationService.createReservation(request);
-
-        String displayMenu = (request.getMenu() != null && !request.getMenu().isBlank())
-                ? request.getMenu()
-                : "（未指定）";
-        String displayDateTime = (request.getDateTime() != null && !request.getDateTime().isBlank())
-                ? request.getDateTime()
-                : "（未指定）";
-        String displayStaff = (request.getStaff() != null && !request.getStaff().isBlank())
-                ? request.getStaff()
-                : "（未指定）";
-        String couponLabel = request.getUseCoupon() ? "あり" : "なし";
-
-        // Flex Message（予約内容 + 末尾に「予約をキャンセル」ボタン）
-        Map<String, Object> bodyBox = new HashMap<>();
-        bodyBox.put("type", "box");
-        bodyBox.put("layout", "vertical");
-        bodyBox.put("contents", List.of(
-                Map.of("type", "text", "text", "【予約内容】", "weight", "bold", "size", "md"),
-                Map.of("type", "text", "text", "メニュー：" + displayMenu, "size", "sm"),
-                Map.of("type", "text", "text", "日時：" + displayDateTime, "size", "sm"),
-                Map.of("type", "text", "text", "担当者：" + displayStaff, "size", "sm"),
-                Map.of("type", "text", "text", "クーポン利用：" + couponLabel, "size", "sm")
-        ));
-
-        Map<String, Object> cancelPostback = Map.of(
-                "type", "postback",
-                "label", "予約をキャンセル",
-                "data", "action=cancel&id=" + reservationId
-        );
-
-        Map<String, Object> cancelButton = Map.of(
-                "type", "button",
-                "style", "primary",
-                "action", cancelPostback
-        );
-
-        Map<String, Object> footerBox = new HashMap<>();
-        footerBox.put("type", "box");
-        footerBox.put("layout", "vertical");
-        footerBox.put("contents", List.of(cancelButton));
-
-        Map<String, Object> bubble = new HashMap<>();
-        bubble.put("type", "bubble");
-        bubble.put("body", bodyBox);
-        bubble.put("footer", footerBox);
-
-        // LINE Messaging API へのリクエストボディ作成
-        Map<String, Object> body = new HashMap<>();
-        body.put("to", request.getUserId());
-        
-        Map<String, Object> message = new HashMap<>();
-        message.put("type", "flex");
-        message.put("altText", "予約が完了しました");
-        message.put("contents", bubble);
-        
-        body.put("messages", Collections.singletonList(message));
-
-        // ヘッダーの設定
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(lineBotToken);
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-        // LINE API を叩く
-        String url = "https://api.line.me/v2/bot/message/push";
-        try {
-            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-            System.out.println("LINE push success: status=" + response.getStatusCode());
-            return ResponseEntity.status(response.getStatusCode()).body("LINEメッセージ送信成功: " + response.getBody());
-        } catch (Exception e) {
-            System.out.println("LINE push failed: " + e.getMessage());
-            return ResponseEntity.status(500).body("LINEメッセージ送信失敗: " + e.getMessage());
-        }
+        return "Reservation created successfully";
     }
 }

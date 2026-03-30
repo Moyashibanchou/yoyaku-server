@@ -1,72 +1,80 @@
 package com.example.Artifact.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class ReservationRequest {
+    private String assistantName;
+    private String reservationDate;
+    private String reservationTime;
+    private String menuName;
+    private String couponName;
+    private String userName;
+    private String userPhone;
 
-    @JsonProperty("userId")
-    private String userId;
-
-    @JsonProperty("name")
-    private String name;
-
-    @JsonProperty("menu")
-    private String menu;
-
-    @JsonProperty("dateTime")
-    private String dateTime;
-
-    @JsonProperty("staff")
-    private String staff;
-
-    @JsonProperty("useCoupon")
-    private boolean useCoupon;
-
-    public String getUserId() {
-        return userId;
+    public String getAssistantName() {
+        return assistantName;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setAssistantName(String assistantName) {
+        this.assistantName = assistantName;
     }
 
-    public String getName() {
-        return name;
+    public String getReservationDate() {
+        return reservationDate;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setReservationDate(String reservationDate) {
+        this.reservationDate = reservationDate;
     }
 
-    public String getMenu() {
-        return menu;
+    public String getReservationTime() {
+        return reservationTime;
     }
 
-    public void setMenu(String menu) {
-        this.menu = menu;
+    public void setReservationTime(String reservationTime) {
+        this.reservationTime = reservationTime;
     }
 
-    public String getDateTime() {
-        return dateTime;
+    public String getMenuName() {
+        return menuName;
     }
 
-    public void setDateTime(String dateTime) {
-        this.dateTime = dateTime;
+    public void setMenuName(String menuName) {
+        this.menuName = menuName;
     }
 
-    public String getStaff() {
-        return staff;
+    public String getCouponName() {
+        return couponName;
     }
 
-    public void setStaff(String staff) {
-        this.staff = staff;
+    public void setCouponName(String couponName) {
+        this.couponName = couponName;
     }
 
-    public boolean getUseCoupon() {
-        return useCoupon;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUseCoupon(boolean useCoupon) {
-        this.useCoupon = useCoupon;
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserPhone() {
+        return userPhone;
+    }
+
+    public void setUserPhone(String userPhone) {
+        this.userPhone = userPhone;
+    }
+
+    @Override
+    public String toString() {
+        return "ReservationRequest{" +
+                "assistantName='" + assistantName + '\'' +
+                ", reservationDate='" + reservationDate + '\'' +
+                ", reservationTime='" + reservationTime + '\'' +
+                ", menuName='" + menuName + '\'' +
+                ", couponName='" + couponName + '\'' +
+                ", userName='" + userName + '\'' +
+                ", userPhone='" + userPhone + '\'' +
+                '}';
     }
 }
