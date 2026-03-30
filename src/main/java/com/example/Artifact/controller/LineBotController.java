@@ -124,7 +124,11 @@ public class LineBotController {
                 if (userId != null) {
                     aiModeUsers.put(userId, true);
                 }
-                return new TextMessage("美容師AIが何でもお答えします！質問をどうぞ✨\n（相談を終わる場合は「終了」と送ってください）");
+                return new TextMessage("美容師AIが何でもお答えします！質問をどうぞ✨\n\n"
+                        + "💡 操作ガイド\n"
+                        + "・AI相談を終わる ➔ 『終了』 と送信\n"
+                        + "・店員に直接相談する ➔ 『店員と話したい』 と送信\n\n"
+                        + "※店員とのやり取りが終わった後は、再度AIがサポートいたします。");
             }
 
             if ("終了".equals(text) && Boolean.TRUE.equals(aiModeUsers.get(userId))) {
@@ -144,7 +148,8 @@ public class LineBotController {
                     try {
                         PushMessageRequest pushMessage = new PushMessageRequest(
                                 adminLineId,
-                                List.of(new TextMessage("【通知】ユーザー " + userId + " が店員との会話を希望し、有人モードに移行しました。")),
+                                List.of(new TextMessage("【通知】ユーザー " + userId
+                                        + " が店員との会話を希望し、有人モードに移行しました。\n(※ AI対応に戻す場合は「対応終了 " + userId + "」と送信してください)")),
                                 false,
                                 null);
                         messagingClient.pushMessage(java.util.UUID.randomUUID(), pushMessage).get();
@@ -178,7 +183,8 @@ public class LineBotController {
                             PushMessageRequest pushMessage = new PushMessageRequest(
                                     adminLineId,
                                     List.of(new TextMessage(
-                                            "【通知】ユーザー " + userId + " への自動回答ができなかったため、有人モードに移行しました。\n質問内容: " + text)),
+                                            "【通知】ユーザー " + userId + " への自動回答ができなかったため、有人モードに移行しました。\n質問内容: " + text
+                                                    + "\n(※ AI対応に戻す場合は「対応終了 " + userId + "」と送信してください)")),
                                     false,
                                     null);
                             messagingClient.pushMessage(java.util.UUID.randomUUID(), pushMessage).get();
