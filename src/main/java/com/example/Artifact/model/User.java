@@ -9,8 +9,8 @@ import jakarta.persistence.Table;
 public class User {
     @Id
     private String id;
-    private boolean isWaitingForHuman;
-    private boolean isManualMode = false;
+    private boolean waitingForHuman;
+    private boolean manualMode = false;
 
     public User() {
     }
@@ -28,18 +28,18 @@ public class User {
     }
 
     public boolean isWaitingForHuman() {
-        return isWaitingForHuman;
+        return waitingForHuman;
     }
 
     public void setWaitingForHuman(boolean waitingForHuman) {
-        isWaitingForHuman = waitingForHuman;
+        this.waitingForHuman = waitingForHuman;
     }
 
     public boolean isManualMode() {
-        return isManualMode;
+        return manualMode;
     }
 
     public void setManualMode(boolean manualMode) {
-        this.isManualMode = manualMode;
+        this.manualMode = manualMode;
     }
 }

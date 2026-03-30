@@ -22,7 +22,7 @@ import com.linecorp.bot.webhook.model.MessageEvent;
 import com.linecorp.bot.webhook.model.PostbackEvent;
 import com.linecorp.bot.webhook.model.TextMessageContent;
 import com.linecorp.bot.messaging.client.MessagingApiClient;
-import com.linecorp.bot.messaging.model.PushMessage;
+import com.linecorp.bot.messaging.model.PushMessageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,9 +89,12 @@ public class LineBotController {
                 if (user.isManualMode()) {
                     log.info("【管理者へのプッシュ通知転送】 ADMIN_LINE_ID: {}", adminLineId);
                     try {
-                        PushMessage pushMessage = new PushMessage(adminLineId,
-                                List.of(new TextMessage("ユーザー " + userId + " からのメッセージ: " + text)), false);
-                        messagingClient.pushMessage(pushMessage).get();
+                        PushMessageRequest pushMessage = new PushMessageRequest(
+                                adminLineId,
+                                List.of(new TextMessage("ユーザー " + userId + " からのメッセージ: " + text)),
+                                false,
+                                null);
+                        messagingClient.pushMessage(java.util.UUID.randomUUID(), pushMessage).get();
                     } catch (Exception e) {
                         log.error("プッシュ通知の送信に失敗しました（メッセージ転送中）: " + e.getMessage(), e);
                     }
@@ -139,9 +142,12 @@ public class LineBotController {
 
                     log.info("【管理者へのプッシュ通知】 ADMIN_LINE_ID: {}", adminLineId);
                     try {
-                        PushMessage pushMessage = new PushMessage(adminLineId,
-                                List.of(new TextMessage("【通知】ユーザー " + userId + " が店員との会話を希望し、有人モードに移行しました。")), false);
-                        messagingClient.pushMessage(pushMessage).get();
+                        PushMessageRequest pushMessage = new PushMessageRequest(
+                                adminLineId,
+                                List.of(new TextMessage("【通知】ユーザー " + userId + " が店員との会話を希望し、有人モードに移行しました。")),
+                                false,
+                                null);
+                        messagingClient.pushMessage(java.util.UUID.randomUUID(), pushMessage).get();
                     } catch (Exception e) {
                         log.error("プッシュ通知の送信に失敗しました（店員呼出）: " + e.getMessage(), e);
                     }
@@ -169,11 +175,13 @@ public class LineBotController {
 
                         log.info("【管理者へのプッシュ通知】 ADMIN_LINE_ID: {}", adminLineId);
                         try {
-                            PushMessage pushMessage = new PushMessage(adminLineId,
+                            PushMessageRequest pushMessage = new PushMessageRequest(
+                                    adminLineId,
                                     List.of(new TextMessage(
                                             "【通知】ユーザー " + userId + " への自動回答ができなかったため、有人モードに移行しました。\n質問内容: " + text)),
-                                    false);
-                            messagingClient.pushMessage(pushMessage).get();
+                                    false,
+                                    null);
+                            messagingClient.pushMessage(java.util.UUID.randomUUID(), pushMessage).get();
                         } catch (Exception e) {
                             log.error("プッシュ通知の送信に失敗しました（AI回答不能時）: " + e.getMessage(), e);
                         }

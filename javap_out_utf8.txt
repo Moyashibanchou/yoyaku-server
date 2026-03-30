@@ -1,0 +1,25 @@
+﻿
+  public abstract java.util.c
+oncurrent.CompletableFuture<c
+om.linecorp.bot.client.base.R
+esult<com.linecorp.bot.messag
+ing.model.NumberOfMessagesRes
+ponse>> getNumberOfSentPushMe
+ssages(java.lang.String);
+  public abstract java.util.c
+oncurrent.CompletableFuture<c
+om.linecorp.bot.client.base.R
+esult<com.linecorp.bot.messag
+ing.model.PushMessageResponse
+>> pushMessage(java.util.UUID
+, com.linecorp.bot.messaging.
+model.PushMessageRequest);
+  public abstract java.util.c
+oncurrent.CompletableFuture<c
+om.linecorp.bot.client.base.R
+esult<java.lang.Void>> pushMe
+ssagesByPhone(java.lang.Strin
+g, com.linecorp.bot.messaging
+.model.PnpMessagesRequest);
+
+
