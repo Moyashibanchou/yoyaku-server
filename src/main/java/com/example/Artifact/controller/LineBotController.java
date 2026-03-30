@@ -298,17 +298,7 @@ public class LineBotController {
     @PostMapping("/api/reservations")
     public String createReservation(@RequestBody ReservationRequest request) {
         if (request.getUserId() != null && !request.getUserId().isEmpty()) {
-            String messageText = String.format(
-                    "【予約完了】\n" +
-                            "ご予約を承りました！\n\n" +
-                            "日時：%s %s\n" +
-                            "担当：%s\n" +
-                            "メニュー：%s\n\n" +
-                            "ご来店をお待ちしております！",
-                    request.getReservationDate(),
-                    request.getReservationTime(),
-                    request.getAssistantName(),
-                    request.getMenuName());
+            String messageText = "予約を承りました";
 
             try {
                 PushMessageRequest pushMessage = new PushMessageRequest(
