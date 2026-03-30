@@ -1,0 +1,49 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.example:Artifact >------------------------
+[INFO] Building  0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ Artifact ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ Artifact ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 18 source files with javac [debug parameters release 17] to target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/keike/OneDrive/制作物/Artifact/src/main/java/com/example/Artifact/controller/TestFlex.java:[16,17] レコード com.linecorp.bot.messaging.model.FlexTextのコンストラクタ FlexTextは指定された型に適用できません。
+  期待値: java.lang.Integer,java.lang.String,java.lang.String,com.linecorp.bot.messaging.model.FlexText.Align,com.linecorp.bot.messaging.model.FlexText.Gravity,java.lang.String,com.linecorp.bot.messaging.model.FlexText.Weight,com.linecorp.bot.messaging.model.FlexText.Style,com.linecorp.bot.messaging.model.FlexText.Decoration,java.lang.Boolean,java.lang.String,java.lang.String,com.linecorp.bot.messaging.model.FlexText.Position,java.lang.String,java.lang.String,java.lang.String,java.lang.String,com.linecorp.bot.messaging.model.Action,java.lang.Integer,java.util.List<com.linecorp.bot.messaging.model.FlexSpan>,com.linecorp.bot.messaging.model.FlexText.AdjustMode,java.lang.Boolean
+  検出値:    <nulltype>,<nulltype>,<nulltype>,<nulltype>,java.lang.String,<nulltype>,java.lang.String,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>
+  理由: 実引数リストと仮引数リストの長さが異なります
+[ERROR] /C:/Users/keike/OneDrive/制作物/Artifact/src/main/java/com/example/Artifact/controller/TestFlex.java:[20,29] レコード com.linecorp.bot.messaging.model.FlexBubbleのコンストラクタ FlexBubbleは指定された型に適用できません。
+  期待値: com.linecorp.bot.messaging.model.FlexBubble.Direction,com.linecorp.bot.messaging.model.FlexBubbleStyles,com.linecorp.bot.messaging.model.FlexBox,com.linecorp.bot.messaging.model.FlexComponent,com.linecorp.bot.messaging.model.FlexBox,com.linecorp.bot.messaging.model.FlexBox,com.linecorp.bot.messaging.model.FlexBubble.Size,com.linecorp.bot.messaging.model.Action
+  検出値:    <nulltype>,<nulltype>,<nulltype>,com.linecorp.bot.messaging.model.FlexBox,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>
+  理由: 実引数リストと仮引数リストの長さが異なります
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.326 s
+[INFO] Finished at: 2026-03-30T23:19:48+09:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.1:compile (default-compile) on project Artifact: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/keike/OneDrive/制作物/Artifact/src/main/java/com/example/Artifact/controller/TestFlex.java:[16,17] レコード com.linecorp.bot.messaging.model.FlexTextのコンストラクタ FlexTextは指定された型に適用できません。
+[ERROR]   期待値: java.lang.Integer,java.lang.String,java.lang.String,com.linecorp.bot.messaging.model.FlexText.Align,com.linecorp.bot.messaging.model.FlexText.Gravity,java.lang.String,com.linecorp.bot.messaging.model.FlexText.Weight,com.linecorp.bot.messaging.model.FlexText.Style,com.linecorp.bot.messaging.model.FlexText.Decoration,java.lang.Boolean,java.lang.String,java.lang.String,com.linecorp.bot.messaging.model.FlexText.Position,java.lang.String,java.lang.String,java.lang.String,java.lang.String,com.linecorp.bot.messaging.model.Action,java.lang.Integer,java.util.List<com.linecorp.bot.messaging.model.FlexSpan>,com.linecorp.bot.messaging.model.FlexText.AdjustMode,java.lang.Boolean
+[ERROR]   検出値:    <nulltype>,<nulltype>,<nulltype>,<nulltype>,java.lang.String,<nulltype>,java.lang.String,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>
+[ERROR]   理由: 実引数リストと仮引数リストの長さが異なります
+[ERROR] /C:/Users/keike/OneDrive/制作物/Artifact/src/main/java/com/example/Artifact/controller/TestFlex.java:[20,29] レコード com.linecorp.bot.messaging.model.FlexBubbleのコンストラクタ FlexBubbleは指定された型に適用できません。
+[ERROR]   期待値: com.linecorp.bot.messaging.model.FlexBubble.Direction,com.linecorp.bot.messaging.model.FlexBubbleStyles,com.linecorp.bot.messaging.model.FlexBox,com.linecorp.bot.messaging.model.FlexComponent,com.linecorp.bot.messaging.model.FlexBox,com.linecorp.bot.messaging.model.FlexBox,com.linecorp.bot.messaging.model.FlexBubble.Size,com.linecorp.bot.messaging.model.Action
+[ERROR]   検出値:    <nulltype>,<nulltype>,<nulltype>,com.linecorp.bot.messaging.model.FlexBox,<nulltype>,<nulltype>,<nulltype>,<nulltype>,<nulltype>
+[ERROR]   理由: 実引数リストと仮引数リストの長さが異なります
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

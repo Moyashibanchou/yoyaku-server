@@ -1,25 +1,18 @@
-﻿
-  public abstract java.util.c
-oncurrent.CompletableFuture<c
-om.linecorp.bot.client.base.R
-esult<com.linecorp.bot.messag
-ing.model.NumberOfMessagesRes
-ponse>> getNumberOfSentPushMe
-ssages(java.lang.String);
-  public abstract java.util.c
-oncurrent.CompletableFuture<c
-om.linecorp.bot.client.base.R
-esult<com.linecorp.bot.messag
-ing.model.PushMessageResponse
->> pushMessage(java.util.UUID
-, com.linecorp.bot.messaging.
-model.PushMessageRequest);
-  public abstract java.util.c
-oncurrent.CompletableFuture<c
-om.linecorp.bot.client.base.R
-esult<java.lang.Void>> pushMe
-ssagesByPhone(java.lang.Strin
-g, com.linecorp.bot.messaging
-.model.PnpMessagesRequest);
-
-
+﻿javap : エラー: クラスが見つかりません: com
+.linecorp.bot.messaging.model
+.FlexBubble
+発生場所 行:1 文字:1
++ javap -cp ~/.m2/repository/
+com/linecorp/bot/line-bot-mes
+saging-api-cl ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (エラー: クラ  
+  スが見つかりませ...odel.FlexBubb   
+ le:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
