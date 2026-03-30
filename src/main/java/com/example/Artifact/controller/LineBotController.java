@@ -21,6 +21,10 @@ import com.linecorp.bot.spring.boot.handler.annotation.LineMessageHandler;
 import com.linecorp.bot.webhook.model.MessageEvent;
 import com.linecorp.bot.webhook.model.PostbackEvent;
 import com.linecorp.bot.webhook.model.TextMessageContent;
+import com.linecorp.bot.messaging.client.MessagingApiClient;
+import com.linecorp.bot.messaging.model.PushMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
@@ -35,7 +39,10 @@ public class LineBotController {
     private final AiService aiService;
     private final UserRepository userRepository;
     private final FaqRepository faqRepository;
+    private final MessagingApiClient messagingClient;
     private final ConcurrentHashMap<String, Boolean> aiModeUsers = new ConcurrentHashMap<>();
+
+    private static final Logger log = LoggerFactory.getLogger(LineBotController.class);
 
     @org.springframework.beans.factory.annotation.Value("${ADMIN_LINE_ID:}")
     private String adminLineId;
@@ -45,12 +52,14 @@ public class LineBotController {
             UserInterestRepository userInterestRepository,
             AiService aiService,
             UserRepository userRepository,
-            FaqRepository faqRepository) {
+            FaqRepository faqRepository,
+            MessagingApiClient messagingClient) {
         this.reservationService = reservationService;
         this.userInterestRepository = userInterestRepository;
         this.aiService = aiService;
         this.userRepository = userRepository;
         this.faqRepository = faqRepository;
+        this.messagingClient = messagingClient;
     }
 
     @EventMapping
@@ -58,11 +67,6 @@ public class LineBotController {
         if (event.message() instanceof TextMessageContent textMessageContent) {
             String text = textMessageContent.text();
             String userId = event.source().userId();
-
-            // 「マイID」コマンド（ユーザーID確認用）
-            if ("マイID".equals(text) && userId != null) {
-                return new TextMessage(userId);
-            }
 
             // 1. 管理者の「対応終了」コマンドの処理
             if (userId != null && userId.equals(adminLineId) && text.startsWith("対応終了")) {
@@ -83,9 +87,14 @@ public class LineBotController {
             if (userId != null) {
                 User user = userRepository.findById(userId).orElse(new User(userId));
                 if (user.isManualMode()) {
-                    // 有人モード中はAIを起動せず、管理者にメッセージを転送（モック）
-                    System.out.println("【管理者へのプッシュ通知転送】ユーザー " + userId + " からのメッセージ: " + text);
-                    // 実際は MessagingApiClient 等で adminLineId へ PushMessage を送信する
+                    log.info("【管理者へのプッシュ通知転送】 ADMIN_LINE_ID: {}", adminLineId);
+                    try {
+                        PushMessage pushMessage = new PushMessage(adminLineId,
+                                List.of(new TextMessage("ユーザー " + userId + " からのメッセージ: " + text)), false);
+                        messagingClient.pushMessage(pushMessage).get();
+                    } catch (Exception e) {
+                        log.error("プッシュ通知の送信に失敗しました（メッセージ転送中）: " + e.getMessage(), e);
+                    }
                     return null; // AIからの自動応答はしない
                 }
             }
@@ -127,8 +136,15 @@ public class LineBotController {
                     user.setWaitingForHuman(true);
                     user.setManualMode(true);
                     userRepository.save(user);
-                    // 管理者通知モック
-                    System.out.println("【管理者へのプッシュ通知】ユーザー " + userId + " が店員との会話を希望し、有人モードに移行しました。");
+
+                    log.info("【管理者へのプッシュ通知】 ADMIN_LINE_ID: {}", adminLineId);
+                    try {
+                        PushMessage pushMessage = new PushMessage(adminLineId,
+                                List.of(new TextMessage("【通知】ユーザー " + userId + " が店員との会話を希望し、有人モードに移行しました。")), false);
+                        messagingClient.pushMessage(pushMessage).get();
+                    } catch (Exception e) {
+                        log.error("プッシュ通知の送信に失敗しました（店員呼出）: " + e.getMessage(), e);
+                    }
                 }
                 return new TextMessage("店員におつなぎしました。今後の返信はスタッフが直接行いますので、ご用件をこのままお送りください。");
             }
@@ -150,7 +166,17 @@ public class LineBotController {
                         user.setWaitingForHuman(true);
                         user.setManualMode(true);
                         userRepository.save(user);
-                        System.out.println("【管理者へのプッシュ通知】ユーザー " + userId + " への自動回答ができなかったため、有人モードに移行しました。");
+
+                        log.info("【管理者へのプッシュ通知】 ADMIN_LINE_ID: {}", adminLineId);
+                        try {
+                            PushMessage pushMessage = new PushMessage(adminLineId,
+                                    List.of(new TextMessage(
+                                            "【通知】ユーザー " + userId + " への自動回答ができなかったため、有人モードに移行しました。\n質問内容: " + text)),
+                                    false);
+                            messagingClient.pushMessage(pushMessage).get();
+                        } catch (Exception e) {
+                            log.error("プッシュ通知の送信に失敗しました（AI回答不能時）: " + e.getMessage(), e);
+                        }
                     }
                     return new TextMessage("申し訳ございません、私（AI）ではうまくお答えできませんでした。店員におつなぎしましたので、このままスタッフの応答をお待ちください。");
                 }
