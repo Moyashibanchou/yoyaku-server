@@ -297,31 +297,29 @@ public class LineBotController {
 
     @PostMapping("/api/reservations")
     public String createReservation(@RequestBody ReservationRequest request) {
-        if (adminLineId != null && !adminLineId.isEmpty()) {
+        if (request.getUserId() != null && !request.getUserId().isEmpty()) {
             String messageText = String.format(
-                    "【新規予約】\n" +
-                            "お客様：%s 様\n" +
+                    "【予約完了】\n" +
+                            "ご予約を承りました！\n\n" +
                             "日時：%s %s\n" +
-                            "メニュー：%s\n" +
                             "担当：%s\n" +
-                            "クーポン：%s",
-                    request.getUserName(),
+                            "メニュー：%s\n\n" +
+                            "ご来店をお待ちしております！",
                     request.getReservationDate(),
                     request.getReservationTime(),
-                    request.getMenuName(),
                     request.getAssistantName(),
-                    request.getCouponName() != null ? request.getCouponName() : "なし");
+                    request.getMenuName());
 
             try {
                 PushMessageRequest pushMessage = new PushMessageRequest(
-                        adminLineId,
+                        request.getUserId(),
                         List.of(new TextMessage(messageText)),
                         false,
                         null);
                 messagingClient.pushMessage(java.util.UUID.randomUUID(), pushMessage).get();
-                log.info("予約通知を管理者に送信しました。");
+                log.info("予約完了通知をお客様へ送信しました。");
             } catch (Exception e) {
-                log.error("予約通知の送信に失敗しました: " + e.getMessage(), e);
+                log.error("予約完了通知の送信に失敗しました: " + e.getMessage(), e);
             }
         }
         return "Reservation created successfully";
