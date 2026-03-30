@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,35 +36,80 @@ public class ReservationController {
         }
 
         // 2. Flex Message（豪華な予約票）の組み立て
-        // デザインパーツの作成
-        FlexBox body = FlexBox.builder()
-                .layout(FlexLayout.VERTICAL)
-                .contents(List.of(
-                        FlexText.builder().text("【予約内容の確認】").weight(FlexText.FlexTextWeight.BOLD).size("xl").build(),
-                        FlexBox.builder().layout(FlexLayout.VERTICAL).margin("lg").spacing("sm").contents(List.of(
-                                FlexText.builder().text("メニュー： " + request.getMenuName()).build(),
-                                FlexText.builder()
-                                        .text("日時： " + request.getReservationDate() + " "
-                                                + request.getReservationTime())
-                                        .build(),
-                                FlexText.builder().text("担当： " + request.getAssistantName()).build(),
-                                FlexText.builder().text("クーポン： " + request.getCouponName()).build())).build()))
-                .build();
+        FlexText title = new FlexText(
+                null,
+                "【予約内容の確認】",
+                "xl",
+                null,
+                null,
+                null,
+                FlexText.Weight.BOLD,
+                null,
+                null,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
 
-        FlexBox footer = FlexBox.builder()
-                .layout(FlexLayout.VERTICAL)
-                .contents(List.of(
-                        FlexButton.builder()
-                                .style(FlexButton.FlexButtonStyle.PRIMARY)
-                                .color("#48BB78")
-                                .action(new UriAction("予約をキャンセル", "https://line.me/R/oaMessage/@YOUR_BOT_ID/", null))
-                                .build()))
-                .build();
+        FlexBox detailBox = createVerticalBox(
+                List.<FlexComponent>of(
+                        new FlexText(null, "メニュー： " + request.getMenuName(), null, null, null, null, null, null, null, true, null, null, null, null, null, null, null, null, null, null, null, null),
+                        new FlexText(null, "日時： " + request.getReservationDate() + " " + request.getReservationTime(), null, null, null, null, null, null, null, true, null, null, null, null, null, null, null, null, null, null, null, null),
+                        new FlexText(null, "担当： " + request.getAssistantName(), null, null, null, null, null, null, null, true, null, null, null, null, null, null, null, null, null, null, null, null),
+                        new FlexText(null, "クーポン： " + request.getCouponName(), null, null, null, null, null, null, null, true, null, null, null, null, null, null, null, null, null, null, null, null)
+                ),
+                "sm",
+                "lg");
 
-        FlexBubble bubble = FlexBubble.builder()
-                .body(body)
-                .footer(footer)
-                .build();
+        FlexBox body = createVerticalBox(
+                List.<FlexComponent>of(title, detailBox),
+                null,
+                null);
+
+        URIAction cancelAction = new URIAction(
+                "予約をキャンセル",
+                URI.create("https://line.me/R/oaMessage/@YOUR_BOT_ID/"),
+                null);
+
+        FlexButton cancelButton = new FlexButton(
+                null,
+                "#48BB78",
+                FlexButton.Style.PRIMARY,
+                cancelAction,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        FlexBox footer = createVerticalBox(
+                List.<FlexComponent>of(cancelButton),
+                null,
+                null);
+
+        FlexBubble bubble = new FlexBubble(
+                null,
+                null,
+                null,
+                null,
+                body,
+                footer,
+                null,
+                null);
 
         FlexMessage flexMessage = new FlexMessage("予約内容の確認", bubble);
 
@@ -79,10 +125,41 @@ public class ReservationController {
             log.info("お客様（{}）へ予約票を送信しました。", request.getUserId());
 
         } catch (Exception e) {
-            log.error("LINE送信失敗: " + e.getMessage(), e);
+            log.error("LINE: " + e.getMessage(), e);
             return "Error: Failed to send LINE message";
         }
 
         return "Reservation created and message sent successfully";
+    }
+
+    private static FlexBox createVerticalBox(List<FlexComponent> contents, String spacing, String margin) {
+        return new FlexBox(
+                FlexBox.Layout.VERTICAL,
+                null,
+                contents,
+                spacing,
+                margin,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 }
