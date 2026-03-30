@@ -26,11 +26,18 @@ import com.linecorp.bot.messaging.model.PushMessageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import com.example.Artifact.dto.ReservationRequest;
 
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RestController
+@CrossOrigin(origins = "https://yoyaku-client.vercel.app")
 @LineMessageHandler
 public class LineBotController {
 
@@ -286,5 +293,37 @@ public class LineBotController {
         }
 
         return new TextMessage("予約が見つかりませんでした");
+    }
+
+    @PostMapping("/api/reservations")
+    public String createReservation(@RequestBody ReservationRequest request) {
+        if (adminLineId != null && !adminLineId.isEmpty()) {
+            String messageText = String.format(
+                    "【新規予約】\n" +
+                            "お客様：%s 様\n" +
+                            "日時：%s %s\n" +
+                            "メニュー：%s\n" +
+                            "担当：%s\n" +
+                            "クーポン：%s",
+                    request.getUserName(),
+                    request.getReservationDate(),
+                    request.getReservationTime(),
+                    request.getMenuName(),
+                    request.getAssistantName(),
+                    request.getCouponName() != null ? request.getCouponName() : "なし");
+
+            try {
+                PushMessageRequest pushMessage = new PushMessageRequest(
+                        adminLineId,
+                        List.of(new TextMessage(messageText)),
+                        false,
+                        null);
+                messagingClient.pushMessage(java.util.UUID.randomUUID(), pushMessage).get();
+                log.info("予約通知を管理者に送信しました。");
+            } catch (Exception e) {
+                log.error("予約通知の送信に失敗しました: " + e.getMessage(), e);
+            }
+        }
+        return "Reservation created successfully";
     }
 }
