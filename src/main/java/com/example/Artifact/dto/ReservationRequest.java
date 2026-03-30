@@ -1,6 +1,7 @@
 package com.example.Artifact.dto;
 
 public class ReservationRequest {
+    private String userId;
     private String assistantName;
     private String reservationDate;
     private String reservationTime;
@@ -8,6 +9,14 @@ public class ReservationRequest {
     private String couponName;
     private String userName;
     private String userPhone;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getAssistantName() {
         return assistantName;
@@ -68,7 +77,8 @@ public class ReservationRequest {
     @Override
     public String toString() {
         return "ReservationRequest{" +
-                "assistantName='" + assistantName + '\'' +
+                "userId='" + userId + '\'' +
+                ", assistantName='" + assistantName + '\'' +
                 ", reservationDate='" + reservationDate + '\'' +
                 ", reservationTime='" + reservationTime + '\'' +
                 ", menuName='" + menuName + '\'' +

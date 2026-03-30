@@ -18,11 +18,11 @@ public class InMemoryReservationService implements ReservationService {
         Reservation reservation = new Reservation();
         reservation.setId(id);
         reservation.setUserId(request.getUserId());
-        reservation.setName(request.getName());
-        reservation.setMenu(request.getMenu());
-        reservation.setDateTime(request.getDateTime());
-        reservation.setStaff(request.getStaff());
-        reservation.setUseCoupon(request.getUseCoupon());
+        reservation.setName(request.getUserName());
+        reservation.setMenu(request.getMenuName());
+        reservation.setDateTime(request.getReservationDate() + " " + request.getReservationTime());
+        reservation.setStaff(request.getAssistantName());
+        reservation.setUseCoupon(request.getCouponName() != null && !request.getCouponName().isEmpty());
 
         store.put(id, reservation);
         return id;
@@ -38,4 +38,3 @@ public class InMemoryReservationService implements ReservationService {
         return store.remove(id) != null;
     }
 }
-
