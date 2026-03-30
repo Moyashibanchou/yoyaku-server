@@ -294,24 +294,4 @@ public class LineBotController {
 
         return new TextMessage("予約が見つかりませんでした");
     }
-
-    @PostMapping("/api/reservations")
-    public String createReservation(@RequestBody ReservationRequest request) {
-        if (request.getUserId() != null && !request.getUserId().isEmpty()) {
-            String messageText = "予約を承りました";
-
-            try {
-                PushMessageRequest pushMessage = new PushMessageRequest(
-                        request.getUserId(),
-                        List.of(new TextMessage(messageText)),
-                        false,
-                        null);
-                messagingClient.pushMessage(java.util.UUID.randomUUID(), pushMessage).get();
-                log.info("予約完了通知をお客様へ送信しました。");
-            } catch (Exception e) {
-                log.error("予約完了通知の送信に失敗しました: " + e.getMessage(), e);
-            }
-        }
-        return "Reservation created successfully";
-    }
 }
