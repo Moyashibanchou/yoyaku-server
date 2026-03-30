@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin(origins = "https://yoyaku-client.vercel.app")
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
